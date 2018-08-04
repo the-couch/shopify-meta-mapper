@@ -2,7 +2,7 @@
 module.exports = (
   `
     <div>
-      <!-- <link href="https://fonts.googleapis.com/css?family=Space+Mono" rel="stylesheet"> -->
+      <link href="https://fonts.googleapis.com/css?family=Space+Mono" rel="stylesheet">
       <style>
         * {
           box-sizing: border-box;
@@ -51,6 +51,10 @@ module.exports = (
         .logger span {
           font-size: 0.7rem;
           color: white;
+          display: block;
+        }
+        .logger span.error {
+          color: red;
         }
         form label span {
           padding-bottom: 30px;
@@ -90,11 +94,11 @@ module.exports = (
             <div style='margin-bottom: 10px; display: flex; justify-content: space-between; padding-top:10px; border-top: 1px solid #ccc;'>
               <label for='new_namespace' style='width: 48%'>
                 <span>New global namespace field</span><br />
-                <input required class=' s-i'  style='width: 100%;' name='current_namespace' placeholder='New Global Namespace' />
+                <input required class=' s-i'  style='width: 100%;' name='new_namespace' placeholder='New Global Namespace' />
               </label>
               <label for='new_key' class='ml05' style='width: 48%'>
                 <span>New key field</span><br />
-                <input required class='s-i' style='width: 100%;' name='newkey' placeholder='New Key Field' />
+                <input required class='s-i' style='width: 100%;' name='new_key' placeholder='New Key Field' />
               </label>
             </div>
             <div>
@@ -103,6 +107,7 @@ module.exports = (
           </form>
         </div>
         <div class='logger'>
+          <div id='logger'></div>
           <span>this is the logger...</span>
         </div>
         <div class='content'>
@@ -127,6 +132,7 @@ module.exports = (
         }
 
         var form = document.getElementById('shopifyForm')
+        var logger = document.getElementById('logger')
 
         form.addEventListener('submit', (e) => {
           e.preventDefault()
@@ -143,6 +149,33 @@ module.exports = (
             return response.json()
           }).then((json) => {
             console.log(json)
+            if (json.error) {
+              var span = document.createElement('span')
+              span.classList.add('error')
+              span.innerHTML = json.reason
+              let logP = logger.parentNode
+              logP.insertBefore(span, logger)
+            } else {
+              console.log('tacos')
+              json.updates.map((log) => {
+                var span = document.createElement('span')
+                if (log.error) {
+                  span.classList.add('error')
+                } else {
+                  span.classList.add('success')
+                }
+                span.innerHTML = log.result + ' for product with id of ' + log.id
+                let logP = logger.parentNode
+                logP.insertBefore(span, logger)
+                console.log('singles')
+              })
+              console.log('timing')
+              var span = document.createElement('span')
+              span.innerHTML = 'successfully updated ' + json.success + ' metafields'
+              let logP = logger.parentNode
+              logP.insertBefore(span, logger)
+            }
+
           })
         })
       </script>

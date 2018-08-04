@@ -15,6 +15,8 @@ const { PORT } = process.env
 
 serverRouter.post('/api/update', (req, res) => {
   const shopifyInfo = req.body
+  let fieldUpdates = []
+  let success = 0
 
   const shopifyAPI = new Shopify({
     shopName: shopifyInfo.store_name,
@@ -24,47 +26,57 @@ serverRouter.post('/api/update', (req, res) => {
   shopifyAPI.product.list({ limit: 250, page: 0 })
     .then(
       (products) => {
-        console.log('hey', products)
+        const results = products.map(async ({id}) => {
+          const metafields = await shopifyAPI.metafield.list({
+            limit: 250,
+            metafield: { owner_resource: 'product', owner_id: id }
+          })
+          const oldField = metafields.find(
+            ({ namespace, key }) => namespace === 'global' && key === 'testing'
+          )
+
+          if (!oldField) {
+            fieldUpdates.push({ id: id, result: 'No field found', error: true })
+          }
+
+          const newField = metafields.find(
+            ({ namespace, key }) => namespace === shopifyInfo.new_namespace && key === shopifyInfo.new_key
+          )
+
+          if (newField) {
+            // console.log('new field', newField)
+            // since the newfield exists let's update it
+            shopifyAPI.metafield.update(newField.id, {
+              value: oldField.value
+            }).then(res => {
+              success++
+              fieldUpdates.push({ id: id, result: 'Successfully updated an existing field', error: false })
+            })
+          } else {
+            fieldUpdates.push({ id: id, result: 'No new field exists for that namespace and key combination', error: true })
+          }
+        })
+        Promise.all(results).then(() => {
+          res.writeHead(200, {
+            'Content-Type': 'application/json'
+          })
+          res.write(JSON.stringify({
+            error: false,
+            updates: fieldUpdates,
+            success: success
+          }))
+          res.end()
+        })
       }, () => {
-        console.log('bad err')
         res.writeHead(200, {
           'Content-Type': 'application/json'
         })
         res.write(JSON.stringify({
-          errors: [
-            'Issue accessing Shopify'
-          ]
+          error: true,
+          reason: 'Issue accessing Shopify'
         }))
         res.end()
       }
-      // products => {
-      //   products.map(async ({id}) => {
-      //     const metafields = await shopifyAPI.metafield.list({
-      //       limit: 250,
-      //       metafield: { owner_resource: 'product', owner_id: id }
-      //     })
-      //     // console.log('what?', metafields)
-      //     const oldField = metafields.find(
-      //       ({ namespace, key }) => namespace === 'global' && key === 'testing'
-      //     )
-      //
-      //     if (!oldField) return
-      //
-      //     const newField = metafields.find(
-      //       ({ namespace, key }) => namespace === 'sf_product_land' && key === 'updated'
-      //     )
-      //
-      //     if (newField) {
-      //       // console.log('new field', newField)
-      //       // since the newfield exists let's update it
-      //       shopifyAPI.metafield.update(newField.id, {
-      //         value: oldField.value
-      //       }).then(res => console.log('response', res))
-      //     }
-      //
-      //     // console.log('there is an old field', oldField)
-      //   })
-      // }
     )
 })
 
