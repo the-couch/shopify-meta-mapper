@@ -46,6 +46,7 @@ module.exports = (
           width: 100%;
           height: 140px;
           padding: 5px;
+          overflow: scroll;
           background-color: #000;
         }
         .logger span {
@@ -55,6 +56,9 @@ module.exports = (
         }
         .logger span.error {
           color: red;
+        }
+        .logger span.success {
+          color: green;
         }
         form label span {
           padding-bottom: 30px;
@@ -145,10 +149,8 @@ module.exports = (
             },
             body: jsonForm
           }).then((response) => {
-            console.log(response)
             return response.json()
           }).then((json) => {
-            console.log(json)
             if (json.error) {
               var span = document.createElement('span')
               span.classList.add('error')
@@ -156,7 +158,6 @@ module.exports = (
               let logP = logger.parentNode
               logP.insertBefore(span, logger)
             } else {
-              console.log('tacos')
               json.updates.map((log) => {
                 var span = document.createElement('span')
                 if (log.error) {
@@ -166,14 +167,12 @@ module.exports = (
                 }
                 span.innerHTML = log.result + ' for product with id of ' + log.id
                 let logP = logger.parentNode
-                logP.insertBefore(span, logger)
-                console.log('singles')
+                logP.insertBefore(span, logP.childNodes[0])
               })
-              console.log('timing')
               var span = document.createElement('span')
               span.innerHTML = 'successfully updated ' + json.success + ' metafields'
               let logP = logger.parentNode
-              logP.insertBefore(span, logger)
+              logP.insertBefore(span, logP.childNodes[0])
             }
 
           })

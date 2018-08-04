@@ -90,7 +90,3 @@ server.use(serverRouter)
 server.listen(PORT || 3001, () => {
   console.log(`internet baby running on ${PORT || 3001}`)
 })
-
-// {{ product.metafields["global"]["testing"] }}
-
-// move to: product.metafields.sf_product_land.updated
