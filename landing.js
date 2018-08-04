@@ -106,7 +106,7 @@ module.exports = (
               </label>
             </div>
             <div>
-              <button type='submit'>Pew pew pew</button>
+              <button type='submit' id='magic'>Pew pew pew</button>
             </div>
           </form>
         </div>
@@ -137,8 +137,10 @@ module.exports = (
 
         var form = document.getElementById('shopifyForm')
         var logger = document.getElementById('logger')
+        var magic = document.getElementById('magic')
 
         form.addEventListener('submit', (e) => {
+          magic.innerHTML = 'Doing stuff...'
           e.preventDefault()
           var jsonForm = toJSONString(form)
           fetch('/api/update', {
@@ -157,6 +159,7 @@ module.exports = (
               span.innerHTML = json.reason
               let logP = logger.parentNode
               logP.insertBefore(span, logger)
+              magic.innerHTML = 'Try again'
             } else {
               json.updates.map((log) => {
                 var span = document.createElement('span')
@@ -173,6 +176,7 @@ module.exports = (
               span.innerHTML = 'successfully updated ' + json.success + ' metafields'
               let logP = logger.parentNode
               logP.insertBefore(span, logP.childNodes[0])
+              magic.innerHTML = 'Do more stuff'
             }
 
           })
