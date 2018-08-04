@@ -46,11 +46,10 @@ serverRouter.post('/api/update', (req, res) => {
           if (newField) {
             // console.log('new field', newField)
             // since the newfield exists let's update it
+            success++
+            fieldUpdates.push({ id: id, result: 'Successfully updated an existing field', error: false })
             shopifyAPI.metafield.update(newField.id, {
               value: oldField.value
-            }).then(res => {
-              success++
-              fieldUpdates.push({ id: id, result: 'Successfully updated an existing field', error: false })
             })
           } else {
             fieldUpdates.push({ id: id, result: 'No new field exists for that namespace and key combination', error: true })
