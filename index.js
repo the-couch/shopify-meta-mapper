@@ -32,7 +32,7 @@ serverRouter.post('/api/update', (req, res) => {
             metafield: { owner_resource: 'product', owner_id: id }
           })
           const oldField = metafields.find(
-            ({ namespace, key }) => namespace === 'global' && key === 'testing'
+            ({ namespace, key }) => namespace === shopifyInfo.current_namespace && key === shopifyInfo.current_key
           )
 
           if (!oldField) {
